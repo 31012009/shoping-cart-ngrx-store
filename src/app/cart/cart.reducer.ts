@@ -13,19 +13,6 @@ export const cartReducer = createReducer(
   initialCartState,
   on(addItem, (state, { item }) => {
     const existing = state.items.find((cartItem) => cartItem.id === item.id);
-    if(existing){
-        return {
-            ...state,
-            items: state.items.map((cartItem) =>
-                cartItem.id === item.id ? { ...cartItem, quantity: cartItem.quantity + 1 } : cartItem
-            ),
-        }
-    }
-    return {
-        ...state,
-        items: [...state.items, { ...item, quantity: 1 }]
-    }
-    
     const items = existing
       ? state.items.map((cartItem) =>
           cartItem.id === item.id ? { ...cartItem, quantity: cartItem.quantity + 1 } : cartItem
