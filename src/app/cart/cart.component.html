@@ -1,0 +1,96 @@
+<section class="cart-page page-width">
+  <div class="cart-heading">
+    <div>
+      <p class="eyebrow"><span></span> YOUR FINDS, ALL TOGETHER</p>
+      <h1>Your bag<span>.</span></h1>
+    </div>
+    @if (items$ | async; as items) {
+      @if (items.length > 0) {
+        <button class="text-button clear-button" type="button" (click)="confirmClear()">Clear bag</button>
+      }
+    }
+  </div>
+
+  @if (items$ | async; as items) {
+    @if (items.length > 0) {
+      <div class="select-all-row">
+        <label class="check-label">
+          <input type="checkbox" [checked]="(allSelected$ | async) ?? false" (change)="toggleAll()" />
+          <span>Select all</span>
+        </label>
+        <span class="column-label">{{ items.length }} {{ items.length === 1 ? 'ITEM' : 'ITEMS' }}</span>
+      </div>
+
+      <div class="cart-layout">
+        <div class="cart-items">
+          @for (item of items; track item.id) {
+            <article class="cart-item">
+              <label class="item-check" [attr.aria-label]="'Select ' + item.name + ' for checkout'">
+                <input
+                  type="checkbox"
+                  [checked]="isSelected(selectedIds$ | async, item)"
+                  (change)="toggleItem(item.id)"
+                />
+              </label>
+              <div class="item-image">
+                @if (details(item.id); as product) {
+                  <img [src]="product.image" [alt]="product.imageAlt" />
+                }
+              </div>
+              <div class="item-info">
+                <p class="item-category">{{ details(item.id)?.category }}</p>
+                <h2>{{ item.name }}</h2>
+                <p class="item-price">{{ item.price | currency:'USD':'symbol':'1.2-2' }} each</p>
+                <div class="quantity-control" [attr.aria-label]="'Quantity for ' + item.name">
+                  <button type="button" [disabled]="item.quantity <= 1" (click)="updateQuantity(item.id, -1)" [attr.aria-label]="'Decrease ' + item.name + ' quantity'">−</button>
+                  <span>{{ item.quantity }}</span>
+                  <button type="button" (click)="updateQuantity(item.id, 1)" [attr.aria-label]="'Increase ' + item.name + ' quantity'">+</button>
+                </div>
+              </div>
+              <div class="item-end">
+                <strong>{{ item.price * item.quantity | currency:'USD':'symbol':'1.2-2' }}</strong>
+                <button class="remove-button" type="button" (click)="remove(item.id)" [attr.aria-label]="'Remove ' + item.name">Remove</button>
+              </div>
+            </article>
+          }
+        </div>
+
+        @if (summary$ | async; as summary) {
+          <aside class="order-summary">
+            <p class="summary-kicker">A little recap</p>
+            <h2>Order summary</h2>
+            <div class="summary-line">
+              <span>Bag total <small>({{ summary.itemCount }} items)</small></span>
+              <span>{{ summary.cartTotal | currency:'USD':'symbol':'1.2-2' }}</span>
+            </div>
+            <div class="summary-line selected-line">
+              <span>Selected for checkout <small>({{ summary.selectedCount }} items)</small></span>
+              <strong>{{ summary.selectedTotal | currency:'USD':'symbol':'1.2-2' }}</strong>
+            </div>
+            <div class="summary-total">
+              <span>Checkout subtotal</span>
+              <strong>{{ summary.selectedTotal | currency:'USD':'symbol':'1.2-2' }}</strong>
+            </div>
+            <button class="checkout-button" type="button" [disabled]="summary.selectedCount === 0" (click)="reviewCheckout()">
+              {{ summary.selectedCount > 0 ? 'Continue with selected' : 'Select items to continue' }}
+              <span aria-hidden="true">↗</span>
+            </button>
+            @if (checkoutMessage) {
+              <p class="checkout-message" role="status">{{ checkoutMessage }}</p>
+            }
+            <p class="shipping-note">Shipping and taxes are calculated at checkout.</p>
+            <a class="back-link" routerLink="/">← Keep looking</a>
+          </aside>
+        }
+      </div>
+    } @else {
+      <div class="empty-state">
+        <div class="empty-mark" aria-hidden="true">F</div>
+        <p class="eyebrow">NOTHING HERE JUST YET</p>
+        <h2>Your next favorite<br /><em>thing is out there.</em></h2>
+        <p class="empty-copy">Take a look around. We’ve gathered a few useful things for the everyday.</p>
+        <a class="shop-button" routerLink="/">Explore the collection <span aria-hidden="true">↗</span></a>
+      </div>
+    }
+  }
+</section>
